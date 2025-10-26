@@ -1,13 +1,28 @@
 import express, {type Request , type Response} from "express";
 import userRoutes from "./routes/user.route.js"
+import myRestaurantRoutes from "./routes/my-restaurant.route.js"
 import cors from "cors";
 import "dotenv/config";
 import connectDb from "./config/connectDb.js";
+import { v2 as cloudinary} from "cloudinary"
 
 connectDb()
 const app = express();
 
+const { CLOUD_NAME, CLOUDINARY_KEY, CLOUDINARY_SECRET } = process.env;
+
+if (!CLOUD_NAME || !CLOUDINARY_KEY || !CLOUDINARY_SECRET) {
+    throw new Error("Missing Cloudinary environment variables: CLOUD_NAME, CLOUDINARY_KEY, CLOUDINARY_SECRET");
+}
+
+cloudinary.config({
+    cloud_name: CLOUD_NAME,
+    api_key: CLOUDINARY_KEY,
+    api_secret: CLOUDINARY_SECRET
+})
+
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.get("/health" , async (req :Request , res : Response ) => {
@@ -15,6 +30,7 @@ app.get("/health" , async (req :Request , res : Response ) => {
 })
 
 app.use("/api/v1/my/user", userRoutes);
+app.use("/api/v1/my/restaurant", myRestaurantRoutes);
 
 const PORT = process.env.PORT || 7000
 
