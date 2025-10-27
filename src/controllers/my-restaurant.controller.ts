@@ -20,13 +20,9 @@ const createMyRestaurant = expressAsyncHandler(async (req: Request , res : Respo
             return;
         }
 
-        const image = req.file as Express.Multer.File;
-        const base64Image = Buffer.from(image.buffer).toString("base64");
-        const dataURI = `data:${image.mimetype};base64,${base64Image}`;
-
-        const uploadResponse = await cloudinary.v2.uploader.upload(dataURI);
+        const imageUrl = await uploadImage(req.file as Express.Multer.File);
         const restaurant = new Restaurant(req.body);
-        restaurant.imageUrl = uploadResponse.url
+        restaurant.imageUrl = imageUrl;
         restaurant.user = new mongoose.Types.ObjectId(userId);
         restaurant.lastUpdated = new Date();
         
@@ -56,7 +52,52 @@ const getMyRestaurant = expressAsyncHandler(async (req : Request, res: Response)
     })
 })
 
+
+// @desc    update my restaurant
+// @route   UPDATE /api/v1/my/restaurant
+// @access  Private
+const updateMyRestaurant = expressAsyncHandler(async(req : Request, res : Response): Promise<void> => {
+    const userId = req.userId;
+
+    const restaurant = await Restaurant.findOne({user : userId});
+    if (!restaurant) {
+       res.status(404).json({ message: "restaurant not found" });
+       return;
+    }
+
+    restaurant.restaurantName = req.body.restaurantName;
+    restaurant.city = req.body.city;
+    restaurant.country = req.body.country;
+    restaurant.deliveryPrice = req.body.deliveryPrice;
+    restaurant.estimatedDeliveryTime = req.body.estimatedDeliveryTime;
+    restaurant.cuisines = req.body.cuisines;
+    restaurant.menuItems = req.body.menuItems;
+    restaurant.lastUpdated = new Date();
+
+    if (req.file) {
+      const imageUrl = await uploadImage(req.file as Express.Multer.File);
+      restaurant.imageUrl = imageUrl;
+    }
+
+    await restaurant.save();
+    res.status(200).json({
+        success : true,
+        message : "Update restaurant successfully",
+        restaurant
+    })
+})
+
+const uploadImage = async (file: Express.Multer.File) => {
+  const image = file;
+  const base64Image = Buffer.from(image.buffer).toString("base64");
+  const dataURI = `data:${image.mimetype};base64,${base64Image}`;
+
+  const uploadResponse = await cloudinary.v2.uploader.upload(dataURI);
+  return uploadResponse.url;
+};
+
 export default {
     createMyRestaurant,
-    getMyRestaurant
+    getMyRestaurant,
+    updateMyRestaurant
 }
