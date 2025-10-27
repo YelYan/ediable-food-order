@@ -1,6 +1,7 @@
 import express, {type Request , type Response} from "express";
 import userRoutes from "./routes/user.route.js"
 import myRestaurantRoutes from "./routes/my-restaurant.route.js"
+import restaurantRoutes from "./routes/restaurant.route.js";
 import cors from "cors";
 import "dotenv/config";
 import connectDb from "./config/connectDb.js";
@@ -31,6 +32,7 @@ app.get("/health" , async (req :Request , res : Response ) => {
 
 app.use("/api/v1/my/user", userRoutes);
 app.use("/api/v1/my/restaurant", myRestaurantRoutes);
+app.use("/api/v1/restaurant", restaurantRoutes);
 
 const PORT = process.env.PORT || 7000
 
