@@ -6,6 +6,7 @@ import myRestaurantController from "../controllers/my-restaurant.controller.js";
 
 const router = express.Router();
 
+router.get("/", jwtCheck , jwtParse , myRestaurantController.getMyRestaurant)
 router.post(
     "/",
     upload.single("imageFile"),

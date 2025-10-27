@@ -10,7 +10,6 @@ import Restaurant from "../models/restaurant.model.js";
 const createMyRestaurant = expressAsyncHandler(async (req: Request , res : Response): Promise<void> => {
         const userId = req.userId;
 
-        console.log(userId, "user IDD")
         const existingRestaurant = await Restaurant.findOne({user : userId});
 
 
@@ -33,7 +32,7 @@ const createMyRestaurant = expressAsyncHandler(async (req: Request , res : Respo
         
         await restaurant.save();
 
-        res.status(200).json({
+        res.status(201).json({
             success : true,
             message : "Restaurant created successfully!",
             restaurant
@@ -41,6 +40,23 @@ const createMyRestaurant = expressAsyncHandler(async (req: Request , res : Respo
         return;
 })
 
+// @desc    get my restaurant
+// @route   GET /api/v1/my/restaurant
+// @access  Private
+const getMyRestaurant = expressAsyncHandler(async (req : Request, res: Response): Promise<void> => {
+    const userId = req.userId;
+
+    const existingRestaurant = await Restaurant.findOne({user : userId});
+    if (!existingRestaurant) {
+       res.status(404).json({ message: "restaurant not found" });
+       return;
+    }
+    res.status(200).json({
+        restaurant : existingRestaurant
+    })
+})
+
 export default {
-    createMyRestaurant
+    createMyRestaurant,
+    getMyRestaurant
 }
