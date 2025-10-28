@@ -2,6 +2,25 @@ import type { Request, Response } from "express";
 import Restaurant from "../models/restaurant.model.js";
 import expressAsyncHandler from "express-async-handler";
 
+const getRestaurant = expressAsyncHandler(async (req : Request , res : Response):Promise<void> => {
+  const restaurantId = req.params.restaurantId;
+
+  if(!restaurantId){
+    res.status(404).json({
+      message : "Restaurant not found!"
+    })
+    return;
+  }
+
+  const restaurant = await Restaurant.findById(restaurantId);
+
+  res.status(200).json({
+    success : true,
+    message : "Resaturant found!",
+    restaurant,
+  })
+})
+
 const searchRestaurant = expressAsyncHandler(async (req: Request, res : Response): Promise<void> => {
     const city = req.params.city;
 
@@ -68,5 +87,6 @@ const searchRestaurant = expressAsyncHandler(async (req: Request, res : Response
 })
 
 export default {
+    getRestaurant,
     searchRestaurant
 }
