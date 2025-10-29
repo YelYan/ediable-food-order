@@ -11,7 +11,7 @@ type CheckoutSessionRequest = {
     cartItems : {
         menuItemId : string;
         name : string;
-        quantity : number;
+        quantity : string;
     }[];
     deliveryDetails : {
         email : string;
