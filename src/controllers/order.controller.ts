@@ -3,6 +3,7 @@ import type { MenuItemType } from "../models/restaurant.model.js";
 import expressAsyncHandler from "express-async-handler"
 import Stripe from "stripe";
 import Restaurant from "../models/restaurant.model.js";
+import Order from "../models/order.model.js";
 
 const STRIPE = new Stripe(process.env.STRIPE_API_KEY as string)
 const FRONTEND_URL = process.env.FRONTEND_URL as string
@@ -34,9 +35,18 @@ const createCheckoutSession = expressAsyncHandler(async (req : Request, res : Re
         throw new Error("Restaurant not found!");
     }
 
+    const newOrder =  new Order({
+        restaurant : restaurant,
+        user : req.userId,
+        status : "placed",
+        deliveryDetails : checkoutSessionRequest.deliveryDetails,
+        cartItems : checkoutSessionRequest.cartItems,
+        createdAt : new Date()
+    })
+
     const lineItems = createLineItems(checkoutSessionRequest , restaurant.menuItems);
 
-    const session = await createSession(lineItems , "TEST ORDER ID", restaurant.deliveryPrice, restaurant._id.toString());
+    const session = await createSession(lineItems , newOrder._id.toString(), restaurant.deliveryPrice, restaurant._id.toString());
 
     if(!session.url){
         res.status(500).json({
@@ -45,6 +55,8 @@ const createCheckoutSession = expressAsyncHandler(async (req : Request, res : Re
         return;
     }
 
+
+    await newOrder.save();
     res.json({url : session.url})
 })
 
