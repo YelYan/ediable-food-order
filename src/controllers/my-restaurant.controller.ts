@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cloudinary from "cloudinary"
 import expressAsyncHandler from "express-async-handler";
 import Restaurant from "../models/restaurant.model.js";
+import Order from "../models/order.model.js";
 
 // @desc    create my restaurant
 // @route   POST /api/v1/my/restaurant
@@ -52,6 +53,27 @@ const getMyRestaurant = expressAsyncHandler(async (req : Request, res: Response)
     })
 })
 
+// @desc    get my restaurant order
+// @route   UPDATE /api/v1/my/restaurant/order
+// @access  Private
+const getmyRestaurantOrders = expressAsyncHandler(async (req : Request, res : Response): Promise<void> => {
+    const userId = req.userId;
+  
+    const restaurant = await Restaurant.findOne({user : userId});
+    if (!restaurant) {
+       res.status(404).json({ message: "restaurant not found" });
+       return;
+    }
+
+
+    const orders = await Order.find({restaurantId : restaurant._id}).populate("restaurant").populate("user");
+    res.status(200).json({
+        success : true,
+        message : "Get restaurant order successfully!",
+        data : orders
+    })
+})
+
 
 // @desc    update my restaurant
 // @route   UPDATE /api/v1/my/restaurant
@@ -98,6 +120,7 @@ const uploadImage = async (file: Express.Multer.File) => {
 
 export default {
     createMyRestaurant,
+    getmyRestaurantOrders,
     getMyRestaurant,
     updateMyRestaurant
 }
