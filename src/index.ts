@@ -23,10 +23,13 @@ cloudinary.config({
     api_secret: CLOUDINARY_SECRET
 })
 
-app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// stripe validation and security reason
+app.use("/api/v1/order/checkout/webhook" , express.raw({type : "*/*"}));
+
+app.use(express.json())
 app.get("/health" , async (req :Request , res : Response ) => {
     res.send({message : "Health ok!"})
 })

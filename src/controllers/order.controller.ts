@@ -7,6 +7,7 @@ import Order from "../models/order.model.js";
 
 const STRIPE = new Stripe(process.env.STRIPE_API_KEY as string)
 const FRONTEND_URL = process.env.FRONTEND_URL as string
+const STRIPE_ENDPOINT_SECRET = process.env.STRIPE_WEBHOOK_SECRET as string
 
 type CheckoutSessionRequest = {
     cartItems : {
@@ -25,10 +26,24 @@ type CheckoutSessionRequest = {
 }
 
 const stripeWebHookHandler = expressAsyncHandler(async (req : Request , res : Response): Promise<void> => {
-    console.log("RECEIEVE EVENT");
-    console.log("===========");
-    console.log("event:" , req.body);
+    let event;
+    const signature = req.headers["stripe-signature"];
+    event = STRIPE.webhooks.constructEvent(req.body, signature as string, STRIPE_ENDPOINT_SECRET )
 
+    if(event.type === "checkout.session.completed"){
+        const order = await Order.findById(event.data.object.metadata?.orderId);
+
+        if(!order) {
+             res.status(404).json({
+                message : "Order not found!"
+             })
+            return;
+        }
+        order.totalAmount = event.data.object.amount_total;
+        order.status = "paid";
+
+        await order.save()
+    }
     res.send()
 })
 
