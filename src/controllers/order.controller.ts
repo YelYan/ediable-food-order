@@ -25,6 +25,15 @@ type CheckoutSessionRequest = {
     restaurantId : string
 }
 
+const getMyOrders = expressAsyncHandler(async (req: Request , res : Response):Promise<void> => {
+    const orders = await Order.findById(req.userId).populate("restaurant").populate("user");
+    res.status(200).json({
+        success : true,
+        message : "Orders get successfully!",
+        data : orders
+    })
+})
+
 const stripeWebHookHandler = expressAsyncHandler(async (req : Request , res : Response): Promise<void> => {
     let event;
     const signature = req.headers["stripe-signature"];
@@ -145,6 +154,7 @@ const createSession =async (
 
 
 export default {
+    getMyOrders,
     createCheckoutSession,
     stripeWebHookHandler
 }
