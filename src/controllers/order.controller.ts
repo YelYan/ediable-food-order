@@ -26,7 +26,13 @@ type CheckoutSessionRequest = {
 }
 
 const getMyOrders = expressAsyncHandler(async (req: Request , res : Response):Promise<void> => {
-    const orders = await Order.findById(req.userId).populate("restaurant").populate("user");
+    const orders = await Order.find({user : req.userId}).populate("restaurant").populate("user");
+    if(!orders) {
+        res.status(404).json({
+            message : "Order not found"
+        })
+        return
+    }
     res.status(200).json({
         success : true,
         message : "Orders get successfully!",

@@ -25,6 +25,6 @@ const restaurantSchema = new mongoose.Schema({
     lastUpdated: { type: Date, required: true },
 })
 
-const Restaurant = mongoose.model("restaurant" , restaurantSchema);
+const Restaurant = mongoose.model("Restaurant" , restaurantSchema);
 
 export default Restaurant

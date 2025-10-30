@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const orderSchema = new mongoose.Schema({
     restaurant : {type : mongoose.Schema.ObjectId, ref : "Restaurant"},
-    user : {type : mongoose.Schema.ObjectId, ref : "User"},
+    user : {type : mongoose.Schema.ObjectId, ref : "User"}, 
     totalAmount : Number,
     deliveryDetails : {
         email : {
@@ -50,6 +50,6 @@ const orderSchema = new mongoose.Schema({
     }
 })
 
-const Order = mongoose.model("order" ,orderSchema);
+const Order = mongoose.model("Order" ,orderSchema);
 
 export default Order
