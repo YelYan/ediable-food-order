@@ -6,7 +6,8 @@ import myRestaurantController from "../controllers/my-restaurant.controller.js";
 
 const router = express.Router();
 
-router.get("/order", myRestaurantController.getmyRestaurantOrders )
+router.get("/order", jwtCheck , jwtParse, myRestaurantController.getmyRestaurantOrders )
+router.patch("/order/:orderId/status" , jwtCheck , jwtParse , myRestaurantController.updateMyRestaurantOrdersStatus)
 router.get("/", jwtCheck , jwtParse , myRestaurantController.getMyRestaurant)
 router.post(
     "/",

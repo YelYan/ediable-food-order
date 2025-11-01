@@ -66,11 +66,47 @@ const getmyRestaurantOrders = expressAsyncHandler(async (req : Request, res : Re
     }
 
 
-    const orders = await Order.find({restaurantId : restaurant._id}).populate("restaurant").populate("user");
+    const orders = await Order.find({restaurant: restaurant._id}).populate("restaurant").populate("user");
     res.status(200).json({
         success : true,
         message : "Get restaurant order successfully!",
         data : orders
+    })
+})
+
+// @desc    update my restaurant order
+// @route   UPDATE /api/v1/my/restaurant/order
+// @access  Private
+const updateMyRestaurantOrdersStatus = expressAsyncHandler(async (req : Request , res : Response):Promise<void> => {
+    const orderId = req.params.orderId;
+    const status = req.body.status;
+    const userId = req.userId;
+   
+
+    const order = await Order.findById(orderId);
+
+    if(!order) {
+        res.status(404).json({
+            message : "Order not found!"
+        })
+        return
+    }
+
+
+    const restaurant = await Restaurant.findById(order.restaurant);
+
+    if(restaurant?.user?._id.toString() !== userId){
+        res.status(401).send()
+        return;
+    }
+
+    order.status = status;
+    await order.save()
+
+    res.status(200).json({
+        success : true,
+        message : "Update order status successfully",
+        data : order
     })
 })
 
@@ -121,6 +157,7 @@ const uploadImage = async (file: Express.Multer.File) => {
 export default {
     createMyRestaurant,
     getmyRestaurantOrders,
+    updateMyRestaurantOrdersStatus,
     getMyRestaurant,
     updateMyRestaurant
 }
